@@ -255,7 +255,9 @@ unavailable.
 ## Security and cost controls
 
 - Server-only `LLM_API_KEY`; `.env*` is git-ignored, `.env.example` has placeholders only.
-- The hosted demo key is an operator credential and can be removed or rotated after judging.
+- The hosted demo key is an operator credential for OpenCode Go, which is designed for
+  coding-agent traffic. Monitor usage, check the provider terms, and remove or rotate the
+  key after judging.
 - Prompts and the current plan are sent to the configured provider (DeepSeek V4.1 Flash via
   OpenCode Go) when AI generation/editing is used. See `LICENSES.md`.
 - Prompt length caps, request body caps, per-IP rate limits.

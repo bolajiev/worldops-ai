@@ -105,7 +105,7 @@ GET https://worldops-ai.vercel.app/api/health
 POST /api/generate-scene (public)
 → mode: ai, source: AI GENERATED, validated 13-object scene, 5 residents, 7.1 s
 
-POST /api/edit-scene (public)
+POST /api/edit-scene (live provider test, local dev server)
 → mode: ai, added a west shelter, rerouted residents, 10.8 s
 
 Browser UI

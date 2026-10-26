@@ -163,9 +163,10 @@ Manual/browser checks:
 
 **Verified live AI:** the public deployment reports `aiConfigured: true` and
 `model: deepseek-v4.1-flash` via `/api/health`. A real public generation produced a validated
-13-object plan in 12.3 s; a real edit added a west shelter and rerouted residents in 10.8 s.
-The browser UI also generated a new village ("East Tide Fishing Village", 16 objects) with
-`AI GENERATED`; direct placement changed the object count 24 → 25. No console errors.
+13-object plan in 7.1 s. A live-provider edit test through the same server route added a west
+shelter and rerouted residents in 10.8 s. The browser UI also generated a new village
+("East Tide Fishing Village", 16 objects) with `AI GENERATED`; direct placement changed the
+object count 24 → 25. No console errors.
 
 ---
 
