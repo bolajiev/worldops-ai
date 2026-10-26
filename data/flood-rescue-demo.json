@@ -1,0 +1,663 @@
+{
+  "version": 1,
+  "title": "Rising Tide",
+  "description": "A fictional Niger Delta-inspired coastal town is cut in two by a canal. A storm surge is pushing in from the east. Move twelve residents to the hilltop shelter before the causeway floods.",
+  "environment": "coastal_town",
+  "worldBounds": {
+    "width": 72,
+    "depth": 52
+  },
+  "simulation": {
+    "waterStart": 0.12,
+    "waterRisePerTick": 0.011,
+    "waterMax": 1.28,
+    "tickMs": 380,
+    "barrierDurationTicks": 420,
+    "boatSpeed": 2.6,
+    "boatCapacity": 2
+  },
+  "objects": [
+    {
+      "id": "shelter-hilltop",
+      "type": "shelter",
+      "name": "Hilltop Shelter",
+      "position": [
+        -28,
+        0,
+        -16
+      ],
+      "scale": [
+        5,
+        3,
+        5
+      ],
+      "status": "normal",
+      "metadata": {
+        "capacity": 24,
+        "elevated": true
+      }
+    },
+    {
+      "id": "school-central",
+      "type": "school",
+      "name": "Riverside Primary",
+      "position": [
+        -20,
+        0,
+        -9
+      ],
+      "scale": [
+        8.5,
+        4.2,
+        5.5
+      ],
+      "status": "normal",
+      "metadata": {
+        "occupancy": 0
+      }
+    },
+    {
+      "id": "clinic-east",
+      "type": "clinic",
+      "name": "Eastbank Clinic",
+      "position": [
+        24,
+        0,
+        -7
+      ],
+      "scale": [
+        5.5,
+        3.8,
+        5.2
+      ],
+      "status": "normal",
+      "metadata": {
+        "beds": 8
+      }
+    },
+    {
+      "id": "house-mango",
+      "type": "house",
+      "name": "Mango House",
+      "position": [
+        -12,
+        0,
+        12
+      ],
+      "scale": [
+        4.2,
+        3.2,
+        4.4
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "house-okoro",
+      "type": "house",
+      "name": "Okoro House",
+      "position": [
+        -4,
+        0,
+        -6
+      ],
+      "scale": [
+        4.4,
+        3.6,
+        4.2
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "house-market",
+      "type": "house",
+      "name": "Market House",
+      "position": [
+        3,
+        0,
+        12
+      ],
+      "scale": [
+        4.8,
+        3.4,
+        4.4
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "house-palm",
+      "type": "house",
+      "name": "Palm House",
+      "position": [
+        20,
+        0,
+        13
+      ],
+      "scale": [
+        4.2,
+        3.4,
+        4.2
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "house-lagoon",
+      "type": "house",
+      "name": "Lagoon House",
+      "position": [
+        26,
+        0,
+        10
+      ],
+      "scale": [
+        4.4,
+        3.2,
+        4.4
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "house-lighthouse",
+      "type": "house",
+      "name": "Lighthouse House",
+      "position": [
+        28,
+        0,
+        0
+      ],
+      "scale": [
+        4.2,
+        3.6,
+        4.2
+      ],
+      "status": "normal"
+    },
+    {
+      "id": "road-market",
+      "type": "road",
+      "name": "Market Road",
+      "position": [
+        0,
+        0.02,
+        4
+      ],
+      "scale": [
+        66,
+        0.12,
+        5
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "arterial",
+        "lowLying": true
+      }
+    },
+    {
+      "id": "road-riverside",
+      "type": "road",
+      "name": "Riverside Road",
+      "position": [
+        8,
+        0.02,
+        18
+      ],
+      "scale": [
+        48,
+        0.12,
+        4.2
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "local",
+        "lowLying": true
+      }
+    },
+    {
+      "id": "road-school",
+      "type": "road",
+      "name": "School Lane",
+      "position": [
+        -16,
+        0.02,
+        -6
+      ],
+      "rotation": [
+        0,
+        1.5707963267948966,
+        0
+      ],
+      "scale": [
+        28,
+        0.12,
+        4
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "local"
+      }
+    },
+    {
+      "id": "road-clinic",
+      "type": "road",
+      "name": "Clinic Lane",
+      "position": [
+        23,
+        0.02,
+        2
+      ],
+      "rotation": [
+        0,
+        1.5707963267948966,
+        0
+      ],
+      "scale": [
+        32,
+        0.12,
+        4
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "local"
+      }
+    },
+    {
+      "id": "road-hill",
+      "type": "road",
+      "name": "Hill Road",
+      "position": [
+        -26,
+        0.02,
+        -6
+      ],
+      "rotation": [
+        0,
+        1.5707963267948966,
+        0
+      ],
+      "scale": [
+        34,
+        0.12,
+        4
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "evacuation"
+      }
+    },
+    {
+      "id": "road-shelter-approach",
+      "type": "road",
+      "name": "Shelter Approach",
+      "position": [
+        -22,
+        0.02,
+        -18
+      ],
+      "scale": [
+        28,
+        0.12,
+        4
+      ],
+      "status": "normal",
+      "metadata": {
+        "lane": "evacuation"
+      }
+    },
+    {
+      "id": "bridge-causeway",
+      "type": "bridge",
+      "name": "Old Causeway",
+      "position": [
+        12.5,
+        0.16,
+        4
+      ],
+      "scale": [
+        8,
+        0.32,
+        5
+      ],
+      "status": "normal",
+      "metadata": {
+        "clearance": 0.55,
+        "crosses": "East Canal"
+      }
+    },
+    {
+      "id": "water-canal",
+      "type": "water",
+      "name": "East Canal",
+      "position": [
+        12.5,
+        0.03,
+        0
+      ],
+      "scale": [
+        4.6,
+        0.08,
+        56
+      ],
+      "status": "normal",
+      "metadata": {
+        "permanent": true
+      }
+    },
+    {
+      "id": "boat-dock",
+      "type": "rescue_boat",
+      "name": "Rescue Skiff",
+      "position": [
+        30,
+        0,
+        23
+      ],
+      "rotation": [
+        0,
+        -0.5,
+        0
+      ],
+      "scale": [
+        2.6,
+        0.8,
+        1.3
+      ],
+      "status": "normal",
+      "metadata": {
+        "home": true
+      }
+    },
+    {
+      "id": "tree-01",
+      "type": "tree",
+      "name": "Mango Tree",
+      "position": [
+        -8,
+        0,
+        8
+      ],
+      "scale": [
+        2,
+        3.6,
+        2
+      ]
+    },
+    {
+      "id": "tree-02",
+      "type": "tree",
+      "name": "Palm",
+      "position": [
+        -17,
+        0,
+        5
+      ],
+      "scale": [
+        1.8,
+        4.2,
+        1.8
+      ]
+    },
+    {
+      "id": "tree-03",
+      "type": "tree",
+      "name": "Palm",
+      "position": [
+        9,
+        0,
+        -3
+      ],
+      "scale": [
+        1.7,
+        3.8,
+        1.7
+      ]
+    },
+    {
+      "id": "tree-04",
+      "type": "tree",
+      "name": "Mango Tree",
+      "position": [
+        18,
+        0,
+        7
+      ],
+      "scale": [
+        2,
+        3.4,
+        2
+      ]
+    },
+    {
+      "id": "tree-05",
+      "type": "tree",
+      "name": "Palm",
+      "position": [
+        28,
+        0,
+        15
+      ],
+      "scale": [
+        1.6,
+        4,
+        1.6
+      ]
+    },
+    {
+      "id": "tree-06",
+      "type": "tree",
+      "name": "Palm",
+      "position": [
+        -30,
+        0,
+        -6
+      ],
+      "scale": [
+        1.8,
+        4.4,
+        1.8
+      ]
+    }
+  ],
+  "agents": [
+    {
+      "id": "resident-amara",
+      "name": "Amara",
+      "role": "resident",
+      "position": [
+        29,
+        0,
+        13
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.38,
+      "homeId": "house-lagoon"
+    },
+    {
+      "id": "resident-tobi",
+      "name": "Tobi",
+      "role": "resident",
+      "position": [
+        26,
+        0,
+        8
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.6,
+      "homeId": "house-lagoon"
+    },
+    {
+      "id": "resident-ngozi",
+      "name": "Ngozi",
+      "role": "resident",
+      "position": [
+        20,
+        0,
+        13
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.85,
+      "homeId": "house-palm"
+    },
+    {
+      "id": "resident-emeka",
+      "name": "Emeka",
+      "role": "resident",
+      "position": [
+        26,
+        0,
+        -4
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.75,
+      "homeId": "house-lighthouse"
+    },
+    {
+      "id": "resident-ife",
+      "name": "Ife",
+      "role": "resident",
+      "position": [
+        30,
+        0,
+        18
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.5,
+      "homeId": "house-lagoon"
+    },
+    {
+      "id": "resident-zainab",
+      "name": "Zainab",
+      "role": "resident",
+      "position": [
+        2,
+        0,
+        11
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.9,
+      "homeId": "house-market"
+    },
+    {
+      "id": "resident-kofi",
+      "name": "Kofi",
+      "role": "resident",
+      "position": [
+        -4,
+        0,
+        -4
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.95,
+      "homeId": "house-okoro"
+    },
+    {
+      "id": "resident-ada",
+      "name": "Ada",
+      "role": "resident",
+      "position": [
+        -11,
+        0,
+        10
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.85,
+      "homeId": "house-mango"
+    },
+    {
+      "id": "resident-femi",
+      "name": "Femi",
+      "role": "resident",
+      "position": [
+        -15,
+        0,
+        -4
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.8,
+      "homeId": "house-okoro"
+    },
+    {
+      "id": "resident-bisi",
+      "name": "Bisi",
+      "role": "resident",
+      "position": [
+        -6,
+        0,
+        3
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.9,
+      "homeId": "house-mango"
+    },
+    {
+      "id": "resident-chidi",
+      "name": "Chidi",
+      "role": "resident",
+      "position": [
+        7,
+        0,
+        8
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.8,
+      "homeId": "house-market"
+    },
+    {
+      "id": "resident-halima",
+      "name": "Halima",
+      "role": "resident",
+      "position": [
+        -21,
+        0,
+        -11
+      ],
+      "goal": "reach_shelter",
+      "status": "idle",
+      "speed": 0.85,
+      "homeId": "house-mango"
+    }
+  ],
+  "objectives": [
+    {
+      "id": "objective-evacuate",
+      "description": "Evacuate all 12 residents to safe ground before the flood cuts the town off.",
+      "kind": "evacuate_residents",
+      "target": 12
+    }
+  ],
+  "events": [
+    {
+      "id": "event-sirens",
+      "kind": "trigger_alarm",
+      "atTick": 2,
+      "description": "Emergency sirens sound across the district."
+    },
+    {
+      "id": "event-debris",
+      "kind": "block_route",
+      "atTick": 10,
+      "targetId": "road-riverside",
+      "description": "Storm debris blocks Riverside Road."
+    },
+    {
+      "id": "event-surge",
+      "kind": "raise_water",
+      "atTick": 30,
+      "value": 0.05,
+      "description": "A surge pushes the flood line further inland."
+    }
+  ],
+  "resourceBudget": {
+    "rescueBoats": 2,
+    "barriers": 3
+  }
+}

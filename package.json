@@ -1,0 +1,47 @@
+{
+  "name": "worldops-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prompt-to-world flood-rescue simulator for the Victoria VR AI Builder Hackathon 2026",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "qa:browser": "node scripts/qa-functional.mjs",
+    "demo:record": "node scripts/record-demo.mjs",
+    "qa:functional": "node scripts/qa-functional.mjs",
+    "qa:visual": "node scripts/qa-visual.mjs"
+  },
+  "dependencies": {
+    "@react-three/drei": "10.7.9",
+    "@react-three/fiber": "9.8.2",
+    "next": "15.5.28",
+    "react": "19.2.9",
+    "react-dom": "19.2.9",
+    "three": "0.186.1",
+    "zod": "4.6.7",
+    "zustand": "5.0.16"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@types/three": "0.186.0",
+    "eslint": "8.57.1",
+    "eslint-config-next": "15.5.28",
+    "playwright": "1.58.2",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
