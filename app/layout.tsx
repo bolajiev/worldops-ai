@@ -1,11 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 
-const display = Space_Grotesk({
+const display = Manrope({
   subsets: ["latin"],
-  variable: "--font-space",
+  variable: "--font-manrope",
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const serif = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  weight: ["400", "500", "600"],
   display: "swap",
 });
 
@@ -50,7 +57,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${serif.variable} ${mono.variable}`}>
       <body>{children}</body>
     </html>
   );

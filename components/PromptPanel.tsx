@@ -40,7 +40,7 @@ export default function PromptPanel() {
   const modeClass = aiConfigured === true ? "ai" : "";
   const modeText =
     aiConfigured === true
-      ? "AI LINK ON — your prompt goes to the server-side planner, then through schema validation."
+      ? "AI ONLINE — DeepSeek V4.1 Flash writes the scene plan. Every response is validated before it reaches the renderer."
       : aiConfigured === false
         ? "LOCAL DEMO — no model key connected. Generation loads the built-in world; edits use the deterministic parser."
         : "Checking whether a server-side AI link is available.";
@@ -51,9 +51,9 @@ export default function PromptPanel() {
         <div className="kicker">
           <span className="num">01</span>
           <span className="bar" />
-          <span>WORLD BRIEF</span>
+          <span>World brief</span>
         </div>
-        <span className="source-chip builtin">FLOOD RULESET</span>
+        <span className="source-chip builtin">Flood ruleset</span>
       </div>
       <h2>
         Describe a world.
@@ -117,7 +117,7 @@ export default function PromptPanel() {
           <span className="dot" />
           <span>
             {aiConfigured
-              ? "The planner is writing a ScenePlan. This can take a few seconds."
+              ? "DeepSeek Flash is writing a ScenePlan. This can take a few seconds."
               : "Loading the validated built-in scenario."}
           </span>
         </div>

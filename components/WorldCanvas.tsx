@@ -11,6 +11,7 @@ import BuildingMesh from "./world/Buildings";
 import { RescueBoats, Residents, RuntimeBarriers } from "./world/Actors";
 import WorldMarkers from "./world/WorldMarkers";
 import CameraRig from "./world/CameraRig";
+import BuildController from "./world/BuildController";
 
 function Scene() {
   const plan = useWorldOps((state) => state.plan);
@@ -74,6 +75,7 @@ function Scene() {
         <BuildingMesh key={object.id} object={object} plan={plan} />
       ))}
 
+      <BuildController />
       <RuntimeBarriers plan={plan} />
       <Residents />
       <RescueBoats />

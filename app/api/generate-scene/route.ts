@@ -4,6 +4,7 @@ import { buildGenerateMessages } from "@/lib/prompts";
 import {
   callChat,
   extractJsonObject,
+  getSessionId,
   isAiConfigured,
 } from "@/lib/provider";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -22,7 +23,7 @@ function errorMessage(error: unknown): string {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const limit = rateLimit(clientKey(request, "generate"), 12, 60_000);
+  const limit = rateLimit(clientKey(request, "generate"), 8, 60_000);
   if (!limit.allowed) {
     return Response.json(
       { error: `Too many generations. Try again in ${limit.retryAfterSeconds}s.` },
@@ -68,12 +69,16 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
+  const sessionId = getSessionId(request);
   let correction: string | undefined;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
-      const text = await callChat(buildGenerateMessages(parsed.data.prompt, correction));
+      const text = await callChat(
+        buildGenerateMessages(parsed.data.prompt, correction),
+        sessionId,
+      );
       const raw = extractJsonObject(text);
       const { plan, warnings } = normalizeScenePlan(raw);
       return Response.json(

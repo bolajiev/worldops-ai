@@ -293,3 +293,8 @@ export type CameraFocus = {
   target: Vec3;
   nonce: number;
 };
+
+export type PlacementTool =
+  | { kind: "object"; type: WorldObjectType }
+  | { kind: "resident" }
+  | { kind: "move"; id: string };

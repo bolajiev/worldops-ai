@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useWorldOps } from "@/lib/store";
+import { BUILD_PALETTE } from "@/lib/builder";
+import type { PlacementTool } from "@/lib/types";
 import {
   AlertIcon,
   ArrowRightIcon,
@@ -27,6 +29,22 @@ export default function EditPanel() {
   const lastEditSummary = useWorldOps((state) => state.lastEditSummary);
   const applyEdit = useWorldOps((state) => state.applyEdit);
   const clearEditError = useWorldOps((state) => state.clearEditError);
+  const placementTool = useWorldOps((state) => state.placementTool);
+  const setPlacementTool = useWorldOps((state) => state.setPlacementTool);
+  const cancelPlacement = useWorldOps((state) => state.cancelPlacement);
+
+  const toggleTool = (tool: PlacementTool) => {
+    if (
+      placementTool &&
+      placementTool.kind === tool.kind &&
+      (tool.kind !== "object" ||
+        (placementTool.kind === "object" && placementTool.type === tool.type))
+    ) {
+      cancelPlacement();
+      return;
+    }
+    setPlacementTool(tool);
+  };
 
   const submit = () => {
     if (!prompt.trim() || isEditing) return;
@@ -40,7 +58,7 @@ export default function EditPanel() {
         <div className="kicker">
           <span className="num">02</span>
           <span className="bar" />
-          <span>EDIT THE LIVE WORLD</span>
+          <span>Edit the live world</span>
         </div>
         <span className="source-chip local" style={{ textTransform: "none" }}>
           T+{String(sim.tick).padStart(3, "0")}
@@ -48,13 +66,114 @@ export default function EditPanel() {
       </div>
       <h2>Change what exists.</h2>
       <p className="panel-copy">
-        Ask for a new shelter, a crossing, or a reroute. Validated patches update the current
-        world without rebuilding the objects you leave alone.
+        Place objects directly, or describe a change. Validated patches update the current
+        world without rebuilding what you leave alone.
       </p>
 
+      {lastEditSummary ? (
+        <div className="applied-box" aria-live="polite" style={{ marginTop: 11 }}>
+          <ShieldIcon size={13} />
+          <span>
+            <span
+              style={{
+                display: "block",
+                fontFamily: "var(--font-mono)",
+                fontSize: 7.5,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "var(--safe)",
+                marginBottom: 3,
+              }}
+            >
+              Applied patch
+            </span>
+            {lastEditSummary}
+          </span>
+        </div>
+      ) : null}
+
+      {editError ? (
+        <div className="error-box" role="alert" style={{ marginTop: 11 }}>
+          <strong>
+            <AlertIcon size={12} /> Edit not applied
+          </strong>
+          {editError}
+          {editSuggestions.length > 0 ? (
+            <div className="suggestions">
+              {editSuggestions.map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className="chip"
+                  onClick={() => {
+                    setPrompt(suggestion);
+                    clearEditError();
+                  }}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="build-section">
+        <div className="build-heading">
+          <span>Build directly</span>
+          <span className="build-hint">Click the ground to place</span>
+        </div>
+        <div className="build-grid">
+          {BUILD_PALETTE.map((item) => {
+            const active =
+              placementTool?.kind === "object" && placementTool.type === item.type;
+            return (
+              <button
+                key={item.type}
+                type="button"
+                className={`build-tile ${active ? "on" : ""}`}
+                onClick={() => toggleTool({ kind: "object", type: item.type })}
+                title={item.hint}
+                aria-pressed={active}
+              >
+                <span className="build-icon" aria-hidden="true">
+                  {item.type === "house" ? "⌂" : item.type === "shelter" ? "△" : item.type === "tree" ? "♧" : item.type === "road" ? "═" : item.type === "bridge" ? "⌒" : item.type === "clinic" ? "+" : "▤"}
+                </span>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            className={`build-tile ${placementTool?.kind === "resident" ? "on" : ""}`}
+            onClick={() => toggleTool({ kind: "resident" })}
+            title="Add a resident and place them on the map"
+            aria-pressed={placementTool?.kind === "resident"}
+          >
+            <span className="build-icon" aria-hidden="true">●</span>
+            <span>Resident</span>
+          </button>
+        </div>
+        {placementTool ? (
+          <div className="placement-inline">
+            <span>
+              {placementTool.kind === "object"
+                ? `Placing ${BUILD_PALETTE.find((item) => item.type === placementTool.type)?.label ?? placementTool.type}`
+                : placementTool.kind === "resident"
+                  ? "Placing a resident"
+                  : "Moving selection"}
+              {" — click the ground."}
+            </span>
+            <button type="button" className="btn btn-sm" onClick={cancelPlacement}>
+              Cancel
+            </button>
+          </div>
+        ) : null}
+      </div>
+
       <label className="field-label" htmlFor="edit-prompt">
-        <span>Edit instruction</span>
-        <span className="count">{aiConfigured === false ? "LOCAL PARSER" : "AI PATCH"}</span>
+        <span>Or describe an edit</span>
+        <span className="count">{aiConfigured === false ? "LOCAL PARSER" : "DEEPSEEK PATCH"}</span>
       </label>
       <textarea
         id="edit-prompt"
@@ -103,54 +222,6 @@ export default function EditPanel() {
         </span>
         {!isEditing ? <ArrowRightIcon size={14} /> : null}
       </button>
-
-      {lastEditSummary ? (
-        <div className="applied-box" aria-live="polite">
-          <ShieldIcon size={13} />
-          <span>
-            <span
-              style={{
-                display: "block",
-                fontFamily: "var(--font-mono)",
-                fontSize: 7.5,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "var(--safe)",
-                marginBottom: 3,
-              }}
-            >
-              Applied patch
-            </span>
-            {lastEditSummary}
-          </span>
-        </div>
-      ) : null}
-
-      {editError ? (
-        <div className="error-box" role="alert">
-          <strong>
-            <AlertIcon size={12} /> Edit not applied
-          </strong>
-          {editError}
-          {editSuggestions.length > 0 ? (
-            <div className="suggestions">
-              {editSuggestions.map((suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  className="chip"
-                  onClick={() => {
-                    setPrompt(suggestion);
-                    clearEditError();
-                  }}
-                >
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      ) : null}
 
       <div className="panel-note">
         {aiConfigured

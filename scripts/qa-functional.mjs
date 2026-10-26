@@ -25,7 +25,7 @@ console.log('result', await stats());
 await page.evaluate(() => document.querySelector('button[aria-label="Reset simulation"]')?.click());
 await page.waitForTimeout(800);
 console.log('reset', await stats());
-await page.evaluate(() => { const tab=[...document.querySelectorAll('[role="tab"]')].find(el=>el.textContent.includes('Edit live world')); if(tab instanceof HTMLElement) tab.click(); });
+await page.evaluate(() => { const tab=[...document.querySelectorAll('[role="tab"]')].find(el=>el.textContent.includes('Edit & build')); if(tab instanceof HTMLElement) tab.click(); });
 await page.waitForTimeout(500);
 await page.locator('#edit-prompt').fill('Add a second shelter to the west and reroute residents');
 await page.evaluate(() => { const b=[...document.querySelectorAll('button')].find(el=>el.textContent.includes('Apply edit')); if(b instanceof HTMLElement) b.click(); });

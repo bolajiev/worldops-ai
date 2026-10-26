@@ -27,9 +27,9 @@ export default function OutcomePanel() {
     <section className="panel panel-pad" aria-label="Mission outcome">
       <div className="panel-head">
         <div className="kicker">
-          <span className="num">MISSION</span>
+          <span className="num">Mission</span>
           <span className="bar" />
-          <span>LIVE OUTCOME</span>
+          <span>Outcome</span>
         </div>
         <span className={`status-pill ${statusClass}`}>
           <span className="status-dot" />
@@ -132,9 +132,9 @@ export default function OutcomePanel() {
       </div>
 
       <div className="outcome-foot">
-        <span>CALCULATED FROM LIVE STATE</span>
+        <span>Calculated from live state</span>
         <span title="Experimental educational simulation; not validated for real-world emergency response.">
-          NOT FOR REAL EMERGENCY USE
+          Not for real emergency use
         </span>
       </div>
     </section>

@@ -111,6 +111,44 @@ function RoadControls({ object }: { object: WorldObject }) {
   );
 }
 
+function ObjectTools({ object }: { object: WorldObject }) {
+  const select = useWorldOps((state) => state.select);
+  const setPlacementTool = useWorldOps((state) => state.setPlacementTool);
+  const rotateSelected = useWorldOps((state) => state.rotateSelected);
+  const duplicateSelected = useWorldOps((state) => state.duplicateSelected);
+  const deleteSelected = useWorldOps((state) => state.deleteSelected);
+
+  return (
+    <div className="builder-actions">
+      <button
+        type="button"
+        className="btn btn-sm"
+        onClick={() => select({ kind: "object", id: object.id }, true)}
+        title="Locate this object in the scene"
+      >
+        <LocateIcon size={11} />
+        Find
+      </button>
+      <button type="button" className="btn btn-sm" onClick={rotateSelected} title="Rotate 45 degrees">
+        Rotate
+      </button>
+      <button
+        type="button"
+        className="btn btn-sm"
+        onClick={() => setPlacementTool({ kind: "move", id: object.id })}
+      >
+        Move
+      </button>
+      <button type="button" className="btn btn-sm" onClick={duplicateSelected} title="Duplicate this object">
+        Copy
+      </button>
+      <button type="button" className="btn btn-sm btn-danger" onClick={deleteSelected} title="Delete this object">
+        Delete
+      </button>
+    </div>
+  );
+}
+
 function AgentDetails({ agent }: { agent: SimAgent }) {
   const plan = useWorldOps((state) => state.plan);
   const sim = useWorldOps((state) => state.sim);
@@ -465,14 +503,6 @@ export default function InspectorPanel() {
                     : null}
                 </div>
                 <div className="inspector-actions">
-                  <button
-                    type="button"
-                    className="btn btn-sm"
-                    onClick={() => select(selected, true)}
-                  >
-                    <LocateIcon size={12} />
-                    Locate
-                  </button>
                   {object.type === "shelter" ? (
                     <button
                       type="button"
@@ -574,9 +604,9 @@ export default function InspectorPanel() {
     <section className="panel panel-pad" aria-label="Inspector">
       <div className="panel-head">
         <div className="kicker">
-          <span className="num">FIELD</span>
+          <span className="num">Field</span>
           <span className="bar" />
-          <span>INSPECTOR</span>
+          <span>Inspector</span>
         </div>
         <button
           type="button"
@@ -600,6 +630,14 @@ export default function InspectorPanel() {
               <div className="sub">{subtitle}</div>
             </div>
           </div>
+          {selected?.kind === "object"
+            ? (() => {
+                const selectedObject = plan.objects.find(
+                  (entry) => entry.id === selected.id,
+                );
+                return selectedObject ? <ObjectTools object={selectedObject} /> : null;
+              })()
+            : null}
           {body}
         </>
       ) : (

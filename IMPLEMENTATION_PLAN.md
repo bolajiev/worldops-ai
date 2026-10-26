@@ -12,15 +12,15 @@ simulation → real interventions → natural-language edit → measured outcome
   patch editor, deterministic tick simulation, A* navigation, flood grid, rescue skiffs,
   sandbag barriers, route open/close, flood-gate hold, calculated outcomes, event log,
   procedural 3D town, selection/inspection, guide and failure states, WebGL fallback.
-- **Implemented and tested with mocks:** server-side AI generate/edit routes and the
-  OpenAI-compatible provider adapter. No live key existed in this environment, so the
-  hosted build will use the clearly-labelled Local Demo mode until `LLM_API_KEY` is set.
-- **Tested:** 53 automated tests pass; typecheck/lint/build pass; Playwright functional flow
-  and 1440×900 visual QA pass. Outcome comparison verified: unassisted 10/12 vs one-skiff
-  12/12.
-- **Released:** public GitHub repository, Vercel production deployment and a 2:29
-  clearly-labelled time-lapse demo video. Public URL QA passed in a clean headless session.
-- **Remaining:** live LLM provider verification once an operator supplies `LLM_API_KEY`.
+- **Live AI:** DeepSeek V4.1 Flash via OpenCode Go is configured server-side on Vercel.
+  Real public generation and editing were verified; the key is excluded from git/client.
+- **UI/build:** paper field-instrument theme, larger serif typography, DeepSeek status, and
+  direct click-to-place building (place, move, rotate, duplicate, delete) are implemented.
+- **Tested:** 58 automated tests pass; typecheck/lint/build pass; browser generation,
+  direct placement, and 1440×900 visual QA pass. Outcome comparison verified: unassisted
+  10/12 vs one-skiff 12/12.
+- **Released:** public GitHub repository and Vercel production deployment with live AI.
+- **Remaining:** commit the redesign, refresh screenshots/demo video, final public QA.
 
 ## Stack
 

@@ -35,7 +35,8 @@ The packages are used under their respective licences and no endorsement is impl
 
 | Font | Licence | Source |
 | --- | --- | --- |
-| Space Grotesk | SIL Open Font License 1.1 | https://fonts.google.com/specimen/Space+Grotesk |
+| Fraunces | SIL Open Font License 1.1 | https://fonts.google.com/specimen/Fraunces |
+| Manrope | SIL Open Font License 1.1 | https://fonts.google.com/specimen/Manrope |
 | IBM Plex Mono | SIL Open Font License 1.1 | https://fonts.google.com/specimen/IBM+Plex+Mono |
 
 Fonts are self-hosted at build time by `next/font/google`. No font files are committed to
@@ -58,6 +59,11 @@ downloaded models, textures, HDRIs, sprites or sound files.
   primitive catalog. No model-generated meshes, textures or code are downloaded or
   executed.
 - **Screenshots/video:** captured from the running app by the project authors.
+- **Runtime AI provider:** DeepSeek V4.1 Flash through OpenCode Go
+  (`https://opencode.ai/inference/go/openai/v1`). The API key is server-side and excluded
+  from the repository. User prompts and current scene plans are sent to that provider when
+  AI generation/editing is used. See https://opencode.ai/docs/go and the provider's privacy
+  terms. Remove or rotate the demo key after judging.
 
 ## Hackathon and platform marks
 

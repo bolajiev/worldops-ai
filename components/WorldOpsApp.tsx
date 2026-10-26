@@ -5,6 +5,7 @@ import { useWorldOps } from "@/lib/store";
 import Header from "./Header";
 import GuideModal from "./GuideModal";
 import Toast from "./Toast";
+import PlacementHint from "./PlacementHint";
 import FloodHud from "./FloodHud";
 import SimulationBar from "./SimulationBar";
 import CommandDeck from "./CommandDeck";
@@ -16,7 +17,7 @@ export default function WorldOpsApp() {
   const status = useWorldOps((state) => state.sim.status);
   const tickMs = useWorldOps((state) => state.plan.simulation.tickMs);
   const speed = useWorldOps((state) => state.speed);
-  const setAiConfigured = useWorldOps((state) => state.setAiConfigured);
+  const setAiStatus = useWorldOps((state) => state.setAiStatus);
   const plan = useWorldOps((state) => state.plan);
   const metrics = useWorldOps((state) => state.metrics);
   const sim = useWorldOps((state) => state.sim);
@@ -33,21 +34,26 @@ export default function WorldOpsApp() {
     let cancelled = false;
     fetch("/api/health", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : null))
-      .then((payload: { aiConfigured?: unknown } | null) => {
-        if (cancelled) return;
-        if (payload && typeof payload.aiConfigured === "boolean") {
-          setAiConfigured(payload.aiConfigured);
-        } else {
-          setAiConfigured(null);
-        }
-      })
+      .then(
+        (payload: { aiConfigured?: unknown; model?: unknown } | null) => {
+          if (cancelled) return;
+          if (payload && typeof payload.aiConfigured === "boolean") {
+            setAiStatus(
+              payload.aiConfigured,
+              typeof payload.model === "string" ? payload.model : null,
+            );
+          } else {
+            setAiStatus(null, null);
+          }
+        },
+      )
       .catch(() => {
-        if (!cancelled) setAiConfigured(null);
+        if (!cancelled) setAiStatus(null, null);
       });
     return () => {
       cancelled = true;
     };
-  }, [setAiConfigured]);
+  }, [setAiStatus]);
 
   useEffect(() => {
     if (status !== "running") return;
@@ -78,7 +84,9 @@ export default function WorldOpsApp() {
         }
       }
       if (event.key === "Escape") {
-        useWorldOps.getState().select(null);
+        const state = useWorldOps.getState();
+        if (state.placementTool) state.cancelPlacement();
+        else state.select(null);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -112,6 +120,7 @@ export default function WorldOpsApp() {
 
         <RightRail />
 
+        <PlacementHint />
         <SimulationBar />
         <Toast />
       </main>

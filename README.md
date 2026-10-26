@@ -18,8 +18,11 @@ existing world in natural language.
 autonomous agents).
 
 **Live demo:** https://worldops-ai.vercel.app
-**Demo video (2:29):** https://worldops-ai.vercel.app/worldops-demo.mp4
+**Demo video:** https://worldops-ai.vercel.app/worldops-demo.mp4
 **Public source:** https://github.com/bolajiev/worldops-ai
+
+The hosted demo is now running **DeepSeek V4.1 Flash** through OpenCode Go. The API key is
+server-side only; nothing is exposed to the browser.
 
 ---
 
@@ -60,10 +63,11 @@ The result is a world that can be inspected, played, changed and measured.
    the inspector shows them as **no dry route**.
 4. Choose **Skiff** on one of them. A rescue craft crosses the flooded east side, recovers
    both, and returns to the rescue dock. The outcome becomes **12/12 safe**.
-5. Reset. Open **Edit live world** and enter:
+5. Reset. Open **Edit & build**. Either place a house directly (Build directly → House →
+   click the ground), or enter:
    *“Add a second shelter to the west and reroute residents.”*
-   A validated patch adds the shelter and redirects all 12 residents; object count goes
-   from 24 → 25 while every original ID stays stable.
+   DeepSeek proposes the patch; the app validates and applies it, adds the shelter, and
+   redirects all 12 residents while every original ID stays stable.
 6. Or try the alternative: select **Old Causeway** → **Deploy barrier**, then hold the
    flood gate. The route stays open and the crowd crosses.
 
@@ -74,15 +78,13 @@ computed by the simulation, not by an LLM.
 
 ### Demo video
 
-The 2:29 video at https://worldops-ai.vercel.app/worldops-demo.mp4 is a clearly-labelled
-**time-lapse** recorded from the real UI: the recording VPS was CPU-constrained, so the
-simulation is advanced between shown states. The hosted app itself runs in real time. The
-video shows the time-lapse label in every caption. No generated footage or mock model calls
-are presented as real.
+The demo video at https://worldops-ai.vercel.app/worldops-demo.mp4 is recorded from the real
+UI. Where the simulation is advanced between shots it is labelled **time-lapse**; the hosted
+app runs in real time. No generated footage or mock model calls are presented as real.
 
-![12/12 safe outcome](docs/success.png)
+![A real DeepSeek-generated village in the new paper-instrument UI](docs/ai-world.png)
 
-![A natural-language edit adds a west shelter and reroutes all residents](docs/edit.png)
+![Direct building: choose an object and click the ground to place it](docs/build.png)
 
 ---
 
@@ -102,7 +104,7 @@ WorldOps has two clearly separated modes:
   key in the client bundle.
 - Provider/base URL/model are configurable (`LLM_BASE_URL`, `LLM_MODEL`).
 
-### 2. Local demo mode — no key required
+### 2. Fallback local mode — no key required
 
 - The built-in **Rising Tide** scenario loads and the full simulation is playable.
 - Natural-language edits are handled by a deterministic local parser that recognises a
@@ -111,11 +113,10 @@ WorldOps has two clearly separated modes:
 - The UI labels this mode **LOCAL DEMO** / **LOCAL PARSER**; nothing pretends an LLM was
   called. Unsupported requests fail with a helpful 422 and suggestions.
 
-> **Build note:** this development environment had no LLM key, so the hosted demo runs in
-> Local Demo mode unless `LLM_API_KEY` is configured before deployment. The live AI route
-> and provider adapter are implemented and covered by end-to-end route tests using a
-> mocked OpenAI-compatible response; they have **not** been exercised against a live paid
-> provider here. Once a key is set, no code change is needed.
+> **Hosted demo:** AI is live at https://worldops-ai.vercel.app using **DeepSeek V4.1
+> Flash** through OpenCode Go. The key is server-side only. Local mode remains the explicit
+> fallback when the provider/key is unavailable; it is clearly labelled and never presented
+> as an AI result.
 
 ---
 
@@ -187,7 +188,8 @@ npm run dev
 # open http://localhost:3000
 ```
 
-The app works immediately in Local Demo mode. To turn on live AI, create `.env.local`:
+With no key the app works immediately in the labelled local fallback. The hosted demo has a
+server-side key. To run live AI locally, create `.env.local`:
 
 ```bash
 cp .env.example .env.local
@@ -202,7 +204,7 @@ The health endpoint reports the active mode: `GET /api/health`.
 ```bash
 npm run typecheck    # TypeScript, strict
 npm run lint         # ESLint / Next core-web-vitals
-npm test             # 53 Vitest tests
+npm test             # 58 Vitest tests
 npm run build        # production build
 npm run start        # serve the production build
 ```
@@ -225,25 +227,37 @@ At the time of writing:
 
 - `npm run typecheck` — pass
 - `npm run lint` — pass, no warnings
-- `npm test` — **53 / 53 tests pass** across schema, normalization, patch atomicity,
-  navigation, simulation, metrics, provider adapter, API fallback and mocked AI routes
+- `npm test` — **58 / 58 tests pass** across schema, normalization, patch atomicity,
+  navigation, simulation, metrics, provider adapter, API fallback, mocked AI routes and
+  the direct-builder operations
 - production build — pass
 - functional browser run (WebGL-disabled fallback path) — staged → running → one skiff →
   **12/12 success** → reset → local NL edit adds a shelter, preserves title and updates
   object count → event-log tab → unsupported edit shows a safe 422
 - visual browser run at 1440 × 900 — no console errors; screenshots in `docs/`
-- **public hosted demo** at https://worldops-ai.vercel.app — loaded in a clean headless
-  session with WebGL, 24 objects, health endpoint in local mode, no console errors
-- **2:29 demo video** at https://worldops-ai.vercel.app/worldops-demo.mp4
+- **public hosted demo** at https://worldops-ai.vercel.app — live DeepSeek V4.1 Flash,
+  verified health (`aiConfigured: true`, model `deepseek-v4.1-flash`) and a real public
+  generation returning a validated 13-object plan in 12.3 s
+- **live AI edit** — a real DeepSeek patch added a west shelter and rerouted residents in 10.8 s
+- **browser AI generation** — prompt → "East Tide Fishing Village", 16 objects, 8 residents;
+  source chip `AI GENERATED`; no console errors
+- **direct building** — Build directly → House → ground click, 24 → 25 objects, validated
+  patch and event update
+- **demo video** at https://worldops-ai.vercel.app/worldops-demo.mp4 (updated from the
+  current UI; see the video note above)
 
-Not yet verified: a live third-party model response (no key existed in this environment).
-The AI route is covered by mocked end-to-end route tests and is ready for a key.
+The live provider now uses a server-side operator key, excluded from the repository and
+client bundle. The built-in scene remains the clearly-labelled fallback when the provider is
+unavailable.
 
 ---
 
 ## Security and cost controls
 
 - Server-only `LLM_API_KEY`; `.env*` is git-ignored, `.env.example` has placeholders only.
+- The hosted demo key is an operator credential and can be removed or rotated after judging.
+- Prompts and the current plan are sent to the configured provider (DeepSeek V4.1 Flash via
+  OpenCode Go) when AI generation/editing is used. See `LICENSES.md`.
 - Prompt length caps, request body caps, per-IP rate limits.
 - 30 s provider timeout, two attempts maximum, no prompt/key logging.
 - Structured JSON only; no executable model output.
@@ -260,6 +274,7 @@ app/                    Next.js App Router page, layout, API routes
 components/             console UI + React Three Fiber scene
   world/                procedural ground, roads, buildings, agents, boats, flood
 lib/
+  builder.ts            object factory + direct-placement operations
   scene-schema.ts       Zod schemas for plans, patches, requests
   scene-normalize.ts    bounds, caps, IDs, defaults, reference repair
   scene-patcher.ts      atomic patch validation/application + app-derived summary
@@ -271,18 +286,18 @@ lib/
   prompts.ts            hardened generation/edit prompts
   local-editor.ts       deterministic demo-mode edit parser
 data/flood-rescue-demo.json
-tests/                  53 Vitest tests
+tests/                  58 Vitest tests
 scripts/                browser QA, screenshot/demo helpers
 docs/                   screenshots and submission notes
 ```
 
 ### Hosted deployment
 
-The production site is deployed with Vercel (Next.js preset, Node 22). The current
-deployment is in Local Demo mode because no model key was available to the build
-environment. To enable live AI, add `LLM_API_KEY` (and optionally `LLM_BASE_URL`,
-`LLM_MODEL`) to the Vercel project's environment variables and redeploy. No client-side
-configuration or code changes are required.
+The production site is deployed with Vercel (Next.js preset, Node 22). The hosted demo uses
+**DeepSeek V4.1 Flash** via OpenCode Go. The key is configured as a server-only Vercel
+environment variable; never as a `NEXT_PUBLIC_` value. To point at another OpenAI-compatible
+provider, change `LLM_BASE_URL` / `LLM_MODEL` and redeploy. Remove or rotate the demo key
+after judging.
 
 ---
 

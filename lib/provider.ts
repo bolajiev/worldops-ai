@@ -66,27 +66,46 @@ function contentFromResponse(payload: unknown): string {
   throw new ProviderError("empty_response", "Provider returned empty content.");
 }
 
-export async function callChat(messages: ChatMessage[]): Promise<string> {
+export function getSessionId(request: Request): string {
+  const supplied = request.headers.get("x-worldops-session")?.trim() ?? "";
+  if (/^[a-zA-Z0-9_-]{8,64}$/.test(supplied)) return supplied;
+  return crypto.randomUUID();
+}
+
+export async function callChat(
+  messages: ChatMessage[],
+  sessionId?: string,
+): Promise<string> {
   const apiKey = process.env.LLM_API_KEY?.trim();
   if (!apiKey) {
     throw new ProviderError("not_configured", "No LLM key is configured.");
   }
 
+  const url = providerUrl();
+  const body: Record<string, unknown> = {
+    model: getAiModel(),
+    messages,
+    temperature: 0.15,
+    max_tokens: 8192,
+    response_format: { type: "json_object" },
+  };
+  // DeepSeek reasoning models spend most of the output budget on hidden
+  // reasoning. WorldOps needs complete, structured scene plans instead.
+  if (process.env.LLM_DISABLE_REASONING === "true" || url.includes("opencode.ai")) {
+    body.thinking = { type: "disabled" };
+  }
+
   let response: Response;
   try {
-    response = await fetch(providerUrl(), {
+    response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
+        "User-Agent": "WorldOpsAI/1.0 (browser demo)",
+        "x-opencode-session": sessionId ?? crypto.randomUUID(),
       },
-      body: JSON.stringify({
-        model: getAiModel(),
-        messages,
-        temperature: 0.15,
-        max_tokens: 4096,
-        response_format: { type: "json_object" },
-      }),
+      body: JSON.stringify(body),
       signal: AbortSignal.timeout(30_000),
       cache: "no-store",
     });

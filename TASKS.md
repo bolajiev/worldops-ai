@@ -31,7 +31,8 @@ Legend: `[x]` done and verified · `[~]` in progress / partial · `[ ]` not star
 - [x] Deterministic local composer + curated preset fallback
 - [x] Prompt panel: examples, loading, errors, fallback, retry, history
 - [x] Health endpoint + AI-configured indicator
-- [~] Live third-party model call — prevented by missing `LLM_API_KEY`; route tested end-to-end with a mocked OpenAI-compatible response
+- [x] Live third-party model call — DeepSeek V4.1 Flash via OpenCode Go, server-side key configured
+- [x] Live AI edit — real patch adds a shelter and reroutes residents
 
 ## M4 — Simulation
 
@@ -57,7 +58,7 @@ Legend: `[x]` done and verified · `[~]` in progress / partial · `[ ]` not star
 - [x] Preserve IDs/positions for untouched entities; tests
 - [x] Rebase live simulation onto edited plan
 - [x] Applied-change summary + event log integration
-- [~] Live AI edits — path implemented and mocked-route tested; no live key available
+- [x] Live AI edits — path exercised against DeepSeek V4.1 Flash
 
 ## M7 — Polish and release
 
@@ -67,7 +68,7 @@ Legend: `[x]` done and verified · `[~]` in progress / partial · `[ ]` not star
 - [x] README, LICENSES.md, SUBMISSION.md, .env.example, MIT LICENSE
 - [x] Public GitHub repo push
 - [x] Vercel production deploy + public URL added to submission
-- [x] Demo video < 3 minutes recorded from the real app (2:29, time-lapse labelled)
+- [x] Demo video < 3 minutes recorded from the real app (2:11, time-lapse labelled)
 - [x] Final fresh-session QA on the public URL (headless Chromium, WebGL, no console errors)
 
 ---
@@ -79,8 +80,8 @@ Last run in this environment:
 ```text
 npm run typecheck    PASS
 npm run lint         PASS (no warnings)
-npm test             PASS — 53/53 tests
-npm run build        PASS
+npm test             PASS — 58/58 tests
+npm run build        PASS (Vercel production build also PASS)
 ```
 
 Browser QA (Playwright, 1440×900 visual + WebGL-disabled functional path):
@@ -97,8 +98,7 @@ WebGL unavailable → 3D fallback shown; console remains usable
 
 ## Open blockers / credentials
 
-- **`LLM_API_KEY`** (and optional `LLM_BASE_URL`, `LLM_MODEL`) must be supplied by the
-  operator to run the live AI path in the hosted demo. Without it, the app is fully usable
-  in clearly-labelled Local Demo mode. No secret is present in the repo or client bundle.
-- None of the required submission assets are missing; a live LLM response remains
-  unexercised without `LLM_API_KEY`.
+- The live provider key is configured server-side in Vercel and excluded from the repository
+  and client bundle. Rotate/remove it after judging.
+- Remaining tasks are release polish: re-record the video and screenshots for the new UI,
+  commit/push the redesign, and re-run the final public QA.

@@ -99,7 +99,7 @@ async function main() {
     }
   });
 
-  await caption("A prompt becomes a playable world: 12 residents, one causeway, a flood from the east.");
+  await caption("An example world is ready. The same console generates new worlds with DeepSeek Flash.");
   await click('button[aria-label="Start simulation"]');
   await page.waitForTimeout(1200);
   await click('button[title="2× simulation speed"]');
@@ -126,19 +126,41 @@ async function main() {
   await caption("12/12 safe. Every outcome number comes from simulation state, not the model.");
 
   await click('button[aria-label="Run simulation again"]');
-  await page.waitForTimeout(1500);
-  await caption("Now edit the existing world. Unchanged objects keep their IDs and positions.");
+  await page.waitForTimeout(1200);
+  await caption("Now build. Place objects directly, then let DeepSeek propose larger edits.");
   await page.evaluate(() => {
-    const tab = [...document.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes("Edit live world"));
+    const tab = [...document.querySelectorAll('[role="tab"]')].find((el) => el.textContent?.includes("Edit & build"));
     if (tab instanceof HTMLElement) tab.click();
   });
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(700);
+  const objectsBefore = Number(await page.locator(".app-shell").getAttribute("data-objects"));
+  await page.evaluate(() => {
+    const tile = [...document.querySelectorAll(".build-tile")].find((el) => el.textContent?.includes("Tree"));
+    if (tile instanceof HTMLElement) tile.click();
+  });
+  for (const [x, y] of [[700, 430], [760, 360], [650, 520], [810, 470]]) {
+    await page.mouse.click(x, y);
+    await page.waitForTimeout(900);
+    const after = Number(await page.locator(".app-shell").getAttribute("data-objects"));
+    if (after > objectsBefore) break;
+  }
+  await page.waitForTimeout(900);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(700);
+  await page.screenshot({ path: "docs/build.png", timeout: 120000 });
+  await caption("Direct placement: no model call. Move, rotate, duplicate or delete from the inspector.");
   await page.locator("#edit-prompt").fill("Add a second shelter to the west and reroute residents", { timeout: 60000 });
+  await caption("Ask DeepSeek for a bigger change: a second shelter and a full reroute.");
+  const editResponse = page.waitForResponse(
+    (response) => response.url().includes("/api/edit-scene") && response.request().method() === "POST",
+    { timeout: 150000 },
+  );
   await clickButtonText("Apply edit");
-  await page.waitForSelector(".applied-box", { timeout: 120000 });
-  await page.waitForTimeout(2200);
+  const response = await editResponse;
+  await response.finished();
+  await page.waitForTimeout(2300);
   await page.screenshot({ path: "docs/edit.png", timeout: 120000 });
-  await caption("A validated patch adds one shelter and reroutes all residents. 24 → 25 objects.");
+  await caption("The AI patch is validated atomically. Untouched IDs and positions remain.");
 
   await page.evaluate(() => {
     const button = document.querySelector('button[aria-label="Inspect Old Causeway"]');

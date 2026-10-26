@@ -19,6 +19,7 @@ export default function Header({ onOpenGuide }: HeaderProps) {
   const plan = useWorldOps((state) => state.plan);
   const sourceLabel = useWorldOps((state) => state.sourceLabel);
   const aiConfigured = useWorldOps((state) => state.aiConfigured);
+  const aiModel = useWorldOps((state) => state.aiModel);
   const simStatus = useWorldOps((state) => state.sim.status);
 
   return (
@@ -81,7 +82,7 @@ export default function Header({ onOpenGuide }: HeaderProps) {
           }`}
           title={
             aiConfigured === true
-              ? "A server-side LLM key is configured. Prompts use the AI planner."
+              ? `${aiModel ?? "DeepSeek Flash"} via the server-side OpenCode Go provider. All scene plans are schema-validated.`
               : aiConfigured === false
                 ? "No LLM key is configured. WorldOps is in deterministic local demo mode."
                 : "Checking AI configuration"
@@ -90,10 +91,12 @@ export default function Header({ onOpenGuide }: HeaderProps) {
           <span className="status-dot" />
           <span>
             {aiConfigured === true
-              ? "AI LINK"
+              ? aiModel?.includes("deepseek")
+                ? "DeepSeek Flash"
+                : "AI online"
               : aiConfigured === false
-                ? "LOCAL MODE"
-                : "CHECKING"}
+                ? "Local mode"
+                : "Checking"}
           </span>
         </div>
         <span className="experiment-badge">

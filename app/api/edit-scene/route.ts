@@ -4,6 +4,7 @@ import { buildEditMessages } from "@/lib/prompts";
 import {
   callChat,
   extractJsonObject,
+  getSessionId,
   isAiConfigured,
 } from "@/lib/provider";
 import { clientKey, rateLimit } from "@/lib/rate-limit";
@@ -69,7 +70,7 @@ function applyLocal(
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const limit = rateLimit(clientKey(request, "edit"), 20, 60_000);
+  const limit = rateLimit(clientKey(request, "edit"), 12, 60_000);
   if (!limit.allowed) {
     return Response.json(
       { error: `Too many edits. Try again in ${limit.retryAfterSeconds}s.` },
@@ -108,6 +109,7 @@ export async function POST(request: Request): Promise<Response> {
     return applyLocal(plan, prompt, selectedId);
   }
 
+  const sessionId = getSessionId(request);
   let correction: string | undefined;
   let lastError: unknown;
 
@@ -115,6 +117,7 @@ export async function POST(request: Request): Promise<Response> {
     try {
       const text = await callChat(
         buildEditMessages(plan, prompt, selectedId, tick, correction),
+        sessionId,
       );
       const payload = extractJsonObject(text) as {
         operations?: unknown;

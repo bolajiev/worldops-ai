@@ -2,7 +2,9 @@
 
 import { create } from "zustand";
 import { DEMO_PROMPT, getDemoPlan } from "./demo-plan";
+import { createDuplicateObject, operationsForPlacement } from "./builder";
 import { calculateMetrics } from "./metrics";
+import { applyScenePatch, PatchError } from "./scene-patcher";
 import { ScenePlanSchema } from "./scene-schema";
 import {
   beginSimulation,
@@ -19,6 +21,8 @@ import type {
   CameraFocus,
   GenerationMode,
   Metrics,
+  PatchOperation,
+  PlacementTool,
   PlanSource,
   ScenePlan,
   Selection,
@@ -48,6 +52,7 @@ type WorldOpsStore = {
   generationMode: GenerationMode | "builtin";
   notice: string | null;
   selected: Selection | null;
+  placementTool: PlacementTool | null;
   focus: CameraFocus | null;
   speed: 1 | 2 | 4;
   worldNonce: number;
@@ -59,6 +64,7 @@ type WorldOpsStore = {
   editNotice: string | null;
   lastEditSummary: string | null;
   aiConfigured: boolean | null;
+  aiModel: string | null;
   history: HistoryEntry[];
   toast: ToastMessage | null;
   pressCount: number;
@@ -88,13 +94,35 @@ type WorldOpsStore = {
   generate: (prompt: string) => Promise<void>;
   applyEdit: (prompt: string) => Promise<void>;
   loadDemo: (notice?: string) => void;
-  setAiConfigured: (configured: boolean | null) => void;
+  setAiStatus: (configured: boolean | null, model: string | null) => void;
+  setPlacementTool: (tool: PlacementTool | null) => void;
+  cancelPlacement: () => void;
+  placeAt: (x: number, z: number) => void;
+  applyLocalOperations: (
+    operations: PatchOperation[],
+    selected?: { kind: "object" | "agent"; id: string } | null,
+  ) => void;
+  rotateSelected: () => void;
+  duplicateSelected: () => void;
+  deleteSelected: () => void;
   dismissToast: () => void;
   clearEditError: () => void;
 };
 
 let toastId = 1;
 let historyId = 1;
+
+const browserSessionId =
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : `worldops-${Date.now().toString(36)}`;
+
+function apiHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    "x-worldops-session": browserSessionId,
+  };
+}
 
 const seededPlan = getDemoPlan();
 const seededSim = createInitialSimulation(seededPlan);
@@ -131,8 +159,9 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
   sourceLabel: "BUILT-IN SCENARIO",
   generationMode: "builtin",
   notice:
-    "Built-in scenario staged. Press play, inspect a resident, or describe a new world.",
+    "Rising Tide is a ready-to-run example. Generate a new world with DeepSeek Flash, or press play.",
   selected: null,
+  placementTool: null,
   focus: null,
   speed: 1,
   worldNonce: 0,
@@ -144,6 +173,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
   editNotice: null,
   lastEditSummary: null,
   aiConfigured: null,
+  aiModel: null,
   history: [],
   toast: null,
   pressCount: 0,
@@ -159,6 +189,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
       generationMode: options.mode,
       notice: options.notice,
       selected: null,
+      placementTool: null,
       focus: null,
       worldNonce: state.worldNonce + 1,
       editError: null,
@@ -183,6 +214,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
       sim,
       metrics: calculateMetrics(plan, sim),
       focus: null,
+      placementTool: null,
       worldNonce: state.worldNonce + 1,
       editError: null,
       toast: { id: toastId++, kind: "info", text: "Scenario reset. Nothing has happened yet." },
@@ -335,7 +367,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
     try {
       const response = await fetch("/api/generate-scene", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({ prompt: trimmed }),
       });
       let payload: unknown;
@@ -409,7 +441,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
     try {
       const response = await fetch("/api/edit-scene", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: apiHeaders(),
         body: JSON.stringify({
           prompt: trimmed,
           plan,
@@ -474,6 +506,7 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
         source: state.source === "ai" ? "ai" : "edited",
         editNotice: summary,
         lastEditSummary: summary,
+        placementTool: null,
         notice: data.notice ?? "Edit applied.",
         history: [
           {
@@ -511,7 +544,107 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
     });
   },
 
-  setAiConfigured: (configured) => set({ aiConfigured: configured }),
+  setAiStatus: (configured, model) =>
+    set({ aiConfigured: configured, aiModel: model }),
+
+  setPlacementTool: (tool) =>
+    set({
+      placementTool: tool,
+      editError: null,
+      editNotice: null,
+    }),
+
+  cancelPlacement: () => set({ placementTool: null }),
+
+  placeAt: (x, z) => {
+    const { plan, placementTool } = get();
+    if (!placementTool) return;
+    const result = operationsForPlacement(plan, placementTool, x, z);
+    if (!result) {
+      set({
+        toast: { id: toastId++, kind: "error", text: "That object could not be placed." },
+      });
+      return;
+    }
+    get().applyLocalOperations(result.operations, result.selected);
+    if (placementTool.kind === "move") set({ placementTool: null });
+  },
+
+  applyLocalOperations: (operations, selected) => {
+    const { plan, sim } = get();
+    try {
+      const result = applyScenePatch(plan, { operations });
+      const nextSim = rebaseSimulation(result.plan, sim, `Built: ${result.summary}`);
+      const nextSelected =
+        selected === null
+          ? null
+          : selected
+            ? { kind: selected.kind, id: selected.id }
+            : get().selected;
+      set({
+        plan: result.plan,
+        sim: nextSim,
+        metrics: calculateMetrics(result.plan, nextSim),
+        selected: nextSelected,
+        editNotice: result.summary,
+        lastEditSummary: result.summary,
+        toast: { id: toastId++, kind: "success", text: result.summary },
+      });
+    } catch (error) {
+      set({
+        toast: {
+          id: toastId++,
+          kind: "error",
+          text:
+            error instanceof PatchError
+              ? error.message
+              : "That change could not be applied.",
+        },
+      });
+    }
+  },
+
+  rotateSelected: () => {
+    const { plan, selected } = get();
+    if (!selected || selected.kind !== "object") return;
+    const object = plan.objects.find((entry) => entry.id === selected.id);
+    if (!object) return;
+    const rotation = object.rotation ?? [0, 0, 0];
+    get().applyLocalOperations(
+      [
+        {
+          op: "update_object",
+          id: object.id,
+          changes: { rotation: [rotation[0], rotation[1] + Math.PI / 4, rotation[2]] },
+        },
+      ],
+      { kind: "object", id: object.id },
+    );
+  },
+
+  duplicateSelected: () => {
+    const { plan, selected } = get();
+    if (!selected || selected.kind !== "object") return;
+    const object = plan.objects.find((entry) => entry.id === selected.id);
+    if (!object) return;
+    const copy = createDuplicateObject(plan, object);
+    get().applyLocalOperations([{ op: "add_object", object: copy }], {
+      kind: "object",
+      id: copy.id,
+    });
+  },
+
+  deleteSelected: () => {
+    const { plan, sim, selected } = get();
+    if (!selected) return;
+    if (selected.kind === "object") {
+      if (!plan.objects.some((object) => object.id === selected.id)) return;
+      get().applyLocalOperations([{ op: "remove_object", id: selected.id }], null);
+    } else if (selected.kind === "agent") {
+      if (!sim.agents.some((agent) => agent.id === selected.id)) return;
+      get().applyLocalOperations([{ op: "remove_agent", id: selected.id }], null);
+    }
+  },
 
   dismissToast: () => set({ toast: null }),
 

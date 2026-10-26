@@ -10,11 +10,11 @@ export default function EventLog() {
     <section className="panel log-panel" aria-label="Simulation event log">
       <div className="log-head">
         <div className="kicker">
-          <span className="num">EVENT</span>
+          <span className="num">Event</span>
           <span className="bar" />
-          <span>LOG</span>
+          <span>Log</span>
         </div>
-        <span className="log-count">{sim.log.length} ENTRIES</span>
+        <span className="log-count">{sim.log.length} {sim.log.length === 1 ? "entry" : "entries"}</span>
       </div>
       <div className="log-list" role="log" aria-live="polite" aria-relevant="additions">
         {entries.length === 0 ? (

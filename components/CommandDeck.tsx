@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useWorldOps } from "@/lib/store";
 import PromptPanel from "./PromptPanel";
 import EditPanel from "./EditPanel";
 
@@ -17,7 +18,10 @@ export default function CommandDeck() {
           role="tab"
           aria-selected={tab === "create"}
           className={`command-tab ${tab === "create" ? "on" : ""}`}
-          onClick={() => setTab("create")}
+          onClick={() => {
+            setTab("create");
+            useWorldOps.getState().cancelPlacement();
+          }}
         >
           <span className="tab-n">01</span>
           Create world
@@ -27,10 +31,13 @@ export default function CommandDeck() {
           role="tab"
           aria-selected={tab === "edit"}
           className={`command-tab ${tab === "edit" ? "on" : ""}`}
-          onClick={() => setTab("edit")}
+          onClick={() => {
+            setTab("edit");
+            useWorldOps.getState().cancelPlacement();
+          }}
         >
           <span className="tab-n">02</span>
-          Edit live world
+          Edit & build
         </button>
       </div>
       {tab === "create" ? <PromptPanel /> : <EditPanel />}
