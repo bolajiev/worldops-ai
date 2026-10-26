@@ -18,7 +18,7 @@ existing world in natural language.
 autonomous agents).
 
 **Live demo:** https://worldops-ai.vercel.app
-**Demo video:** https://worldops-ai.vercel.app/worldops-demo.mp4
+**Demo video (2:11):** https://worldops-ai.vercel.app/worldops-demo.mp4
 **Public source:** https://github.com/bolajiev/worldops-ai
 
 The hosted demo is now running **DeepSeek V4.1 Flash** through OpenCode Go. The API key is

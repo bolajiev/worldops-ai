@@ -20,7 +20,9 @@ simulation → real interventions → natural-language edit → measured outcome
   direct placement, and 1440×900 visual QA pass. Outcome comparison verified: unassisted
   10/12 vs one-skiff 12/12.
 - **Released:** public GitHub repository and Vercel production deployment with live AI.
-- **Remaining:** commit the redesign, refresh screenshots/demo video, final public QA.
+- **Released:** the redesigned UI, direct builder, live DeepSeek provider, refreshed
+  screenshots and a 2:11 demo video are deployed; public AI generation was verified on the
+  final URL. The source repo is public.
 
 ## Stack
 

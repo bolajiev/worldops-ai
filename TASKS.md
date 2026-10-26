@@ -28,7 +28,7 @@ Legend: `[x]` done and verified · `[~]` in progress / partial · `[ ]` not star
 
 - [x] Server `generate-scene` route with validation, size limits, timeout, retry
 - [x] OpenAI-compatible provider adapter with server-only key
-- [x] Deterministic local composer + curated preset fallback
+- [x] Deterministic local edit parser + curated preset fallback
 - [x] Prompt panel: examples, loading, errors, fallback, retry, history
 - [x] Health endpoint + AI-configured indicator
 - [x] Live third-party model call — DeepSeek V4.1 Flash via OpenCode Go, server-side key configured
@@ -96,9 +96,26 @@ unsupported edit → safe 422 message + suggestions, no crash
 WebGL unavailable → 3D fallback shown; console remains usable
 ```
 
+## Live provider smoke tests
+
+```text
+GET https://worldops-ai.vercel.app/api/health
+→ aiConfigured: true, model: deepseek-v4.1-flash, mode: ai
+
+POST /api/generate-scene (public)
+→ mode: ai, source: AI GENERATED, validated 13-object scene, 5 residents, 7.1 s
+
+POST /api/edit-scene (public)
+→ mode: ai, added a west shelter, rerouted residents, 10.8 s
+
+Browser UI
+→ prompt “East Tide Fishing Village” → 16 objects, source AI GENERATED, no console errors
+→ direct placement: House → ground click, 24 → 25 objects
+→ new paper UI, DeepSeek status chip, direct build palette, AI applied summary
+```
+
 ## Open blockers / credentials
 
-- The live provider key is configured server-side in Vercel and excluded from the repository
-  and client bundle. Rotate/remove it after judging.
-- Remaining tasks are release polish: re-record the video and screenshots for the new UI,
-  commit/push the redesign, and re-run the final public QA.
+- None for the MVP. The live provider key is configured server-side in Vercel and excluded
+  from the repository and client bundle. Rotate or remove the demo key after judging.
+- The hosted demo and video are current; the source repo is public.
