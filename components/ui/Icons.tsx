@@ -120,6 +120,75 @@ export function WaterIcon({ size = 16, className }: IconProps) {
   );
 }
 
+
+export function CursorIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path d="m5 3 14 8.5-6.2 1.4L10.8 19 5 3Z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function PlusIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="M12 5v14M5 12h14" />
+    </svg>
+  );
+}
+
+export function MoveIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="M12 3v18M3 12h18M12 3 9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3" />
+    </svg>
+  );
+}
+
+export function RotateIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="M20 11a8 8 0 1 0-2.3 5.7" />
+      <path {...base} d="M20 4v7h-7" />
+    </svg>
+  );
+}
+
+export function TrashIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+    </svg>
+  );
+}
+
+export function LayersIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="m12 3 9 5-9 5-9-5 9-5Z" />
+      <path {...base} d="m3 12 9 5 9-5M3 16l9 5 9-5" />
+    </svg>
+  );
+}
+
+export function HistoryIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="M4 5v5h5" />
+      <path {...base} d="M4.5 10a8 8 0 1 1 1.2 7" />
+      <path {...base} d="M12 8v5l3 2" />
+    </svg>
+  );
+}
+
+export function ChevronIcon({ size = 16, className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path {...base} d="m8 10 4 4 4-4" />
+    </svg>
+  );
+}
+
 export function Spinner({ size = 16, className }: IconProps) {
   return (
     <svg

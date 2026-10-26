@@ -1,5 +1,5 @@
-import WorldOpsApp from "@/components/WorldOpsApp";
+import StudioApp from "@/components/studio/StudioApp";
 
 export default function Home() {
-  return <WorldOpsApp />;
+  return <StudioApp />;
 }

@@ -3,6 +3,15 @@
 import { create } from "zustand";
 import { DEMO_PROMPT, getDemoPlan } from "./demo-plan";
 import { createDuplicateObject, operationsForPlacement } from "./builder";
+import {
+  appendVersion,
+  makeVersion,
+  nextVersionLabel,
+  type StudioLeftTab,
+  type StudioVersion,
+  type StudioVersionSource,
+  type StudioView,
+} from "./studio";
 import { calculateMetrics } from "./metrics";
 import { applyScenePatch, PatchError } from "./scene-patcher";
 import { ScenePlanSchema } from "./scene-schema";
@@ -53,6 +62,10 @@ type WorldOpsStore = {
   notice: string | null;
   selected: Selection | null;
   placementTool: PlacementTool | null;
+  view: StudioView;
+  leftTab: StudioLeftTab;
+  versions: StudioVersion[];
+  currentVersionId: string | null;
   focus: CameraFocus | null;
   speed: 1 | 2 | 4;
   worldNonce: number;
@@ -97,6 +110,9 @@ type WorldOpsStore = {
   setAiStatus: (configured: boolean | null, model: string | null) => void;
   setPlacementTool: (tool: PlacementTool | null) => void;
   cancelPlacement: () => void;
+  setView: (view: StudioView) => void;
+  setLeftTab: (tab: StudioLeftTab) => void;
+  restoreVersion: (id: string) => void;
   placeAt: (x: number, z: number) => void;
   applyLocalOperations: (
     operations: PatchOperation[],
@@ -126,6 +142,13 @@ function apiHeaders(): Record<string, string> {
 
 const seededPlan = getDemoPlan();
 const seededSim = createInitialSimulation(seededPlan);
+const seededVersion = makeVersion(
+  seededPlan,
+  "v1",
+  "Rising Tide · example",
+  "example",
+  "version-1",
+);
 
 function focusTargetFor(
   plan: ScenePlan,
@@ -162,6 +185,10 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
     "Rising Tide is a ready-to-run example. Generate a new world with DeepSeek Flash, or press play.",
   selected: null,
   placementTool: null,
+  view: "welcome",
+  leftTab: "agent",
+  versions: [seededVersion],
+  currentVersionId: seededVersion.id,
   focus: null,
   speed: 1,
   worldNonce: 0,
@@ -180,31 +207,51 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
 
   loadPlan: (plan, options) => {
     const sim = createInitialSimulation(plan);
-    set((state) => ({
-      plan,
-      sim,
-      metrics: calculateMetrics(plan, sim),
-      source: options.source,
-      sourceLabel: options.sourceLabel,
-      generationMode: options.mode,
-      notice: options.notice,
-      selected: null,
-      placementTool: null,
-      focus: null,
-      worldNonce: state.worldNonce + 1,
-      editError: null,
-      editNotice: null,
-      lastEditSummary: null,
-      generationError: null,
-      toast: {
-        id: toastId++,
-        kind: options.mode === "ai" ? "success" : "info",
-        text:
-          options.mode === "ai"
-            ? "AI scene generated, validated and loaded."
-            : "Scenario loaded.",
-      },
-    }));
+    set((state) => {
+      const versionSource: StudioVersionSource =
+        options.mode === "ai"
+          ? "ai"
+          : options.mode === "local"
+            ? "local"
+            : options.mode === "builtin"
+              ? "example"
+              : "local";
+      const version = makeVersion(
+        plan,
+        nextVersionLabel(state.versions),
+        `${plan.title} · ${options.mode === "ai" ? "AI generated" : options.mode === "builtin" ? "example" : "local scene"}`,
+        versionSource,
+      );
+      const versions = appendVersion(state.versions, version);
+      return {
+        plan,
+        sim,
+        metrics: calculateMetrics(plan, sim),
+        source: options.source,
+        sourceLabel: options.sourceLabel,
+        generationMode: options.mode,
+        notice: options.notice,
+        selected: null,
+        placementTool: null,
+        view: "build",
+        focus: null,
+        worldNonce: state.worldNonce + 1,
+        versions,
+        currentVersionId: version.id,
+        editError: null,
+        editNotice: null,
+        lastEditSummary: null,
+        generationError: null,
+        toast: {
+          id: toastId++,
+          kind: options.mode === "ai" ? "success" : "info",
+          text:
+            options.mode === "ai"
+              ? "AI scene generated, validated and loaded."
+              : "Scenario loaded.",
+        },
+      };
+    });
   },
 
   reset: () => {
@@ -498,7 +545,16 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
           parsed.data.objects.some((object) => object.id === selected.id)) ||
         (selected.kind === "agent" &&
           nextSim.agents.some((agent) => agent.id === selected.id));
-      set((state) => ({
+      set((state) => {
+        const versionSource: StudioVersionSource =
+          data.mode === "ai" ? "ai" : "local";
+        const version = makeVersion(
+          parsed.data,
+          nextVersionLabel(state.versions),
+          summary,
+          versionSource,
+        );
+        return {
         plan: parsed.data,
         sim: nextSim,
         metrics: calculateMetrics(parsed.data, nextSim),
@@ -508,6 +564,8 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
         lastEditSummary: summary,
         placementTool: null,
         notice: data.notice ?? "Edit applied.",
+        versions: appendVersion(state.versions, version),
+        currentVersionId: version.id,
         history: [
           {
             id: historyId++,
@@ -519,7 +577,8 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
           ...state.history,
         ].slice(0, 6),
         toast: { id: toastId++, kind: "success", text: summary },
-      }));
+        };
+      });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "The edit failed.";
@@ -556,6 +615,42 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
 
   cancelPlacement: () => set({ placementTool: null }),
 
+  setView: (view) =>
+    set({
+      view,
+      placementTool: view === "build" ? get().placementTool : null,
+    }),
+
+  setLeftTab: (leftTab) => set({ leftTab }),
+
+  restoreVersion: (id) => {
+    const version = get().versions.find((entry) => entry.id === id);
+    if (!version) return;
+    const plan = structuredClone(version.plan);
+    const sim = createInitialSimulation(plan);
+    set((state) => ({
+      plan,
+      sim,
+      metrics: calculateMetrics(plan, sim),
+      currentVersionId: version.id,
+      source: "edited",
+      sourceLabel: "RESTORED VERSION",
+      view: "build",
+      selected: null,
+      focus: null,
+      placementTool: null,
+      editError: null,
+      editNotice: version.summary,
+      lastEditSummary: version.summary,
+      worldNonce: state.worldNonce + 1,
+      toast: {
+        id: toastId++,
+        kind: "info",
+        text: `Restored ${version.label} · ${version.summary}`,
+      },
+    }));
+  },
+
   placeAt: (x, z) => {
     const { plan, placementTool } = get();
     if (!placementTool) return;
@@ -581,15 +676,23 @@ export const useWorldOps = create<WorldOpsStore>()((set, get) => ({
           : selected
             ? { kind: selected.kind, id: selected.id }
             : get().selected;
-      set({
+      const version = makeVersion(
+        result.plan,
+        nextVersionLabel(get().versions),
+        result.summary,
+        "manual",
+      );
+      set((state) => ({
         plan: result.plan,
         sim: nextSim,
         metrics: calculateMetrics(result.plan, nextSim),
         selected: nextSelected,
         editNotice: result.summary,
         lastEditSummary: result.summary,
+        versions: appendVersion(state.versions, version),
+        currentVersionId: version.id,
         toast: { id: toastId++, kind: "success", text: result.summary },
-      });
+      }));
     } catch (error) {
       set({
         toast: {

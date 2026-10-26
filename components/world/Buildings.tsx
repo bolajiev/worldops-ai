@@ -8,7 +8,6 @@ import type { ScenePlan, WorldObject } from "@/lib/types";
 import { useWorldOps } from "@/lib/store";
 import { COLORS, hashString, pickFrom } from "./theme";
 import SelectionRing from "./SelectionRing";
-import WorldLabelSprite from "./WorldLabelSprite";
 
 type BuildingProps = {
   object: WorldObject;
@@ -74,20 +73,11 @@ function Window({
 
 function ShelterMesh({ object }: BuildingProps) {
   const { isSelected, select, hovered, setHovered } = useObjectSelection(object);
-  const sim = useWorldOps((state) => state.sim);
   const stage = useRef<Mesh>(null);
   const halo = useRef<Mesh>(null);
   const beacon = useRef<MeshStandardMaterial>(null);
   const [sx, sy, sz] = object.scale ?? [4.6, 3, 4.6];
   const rescueOnly = object.metadata?.rescueOnly === true;
-  const safeHere = sim.agents.filter(
-    (agent) => agent.status === "safe" && agent.targetShelterId === object.id,
-  ).length;
-  const inbound = sim.agents.filter(
-    (agent) =>
-      agent.targetShelterId === object.id &&
-      (agent.status === "moving" || agent.status === "idle"),
-  ).length;
   const rotation = object.rotation?.[1] ?? 0;
 
   useFrame(({ clock }) => {
@@ -232,15 +222,6 @@ function ShelterMesh({ object }: BuildingProps) {
 
       <SelectionRing radius={Math.max(sx, sz) * 0.72 + 0.5} active={isSelected} y={0.05} />
 
-      <WorldLabelSprite
-        position={[0, sy + 2.15, 0]}
-        accent={rescueOnly ? "#ffb45c" : isSelected ? "#ffb45c" : "#63d2c9"}
-        text={`${rescueOnly ? "RESCUE" : "SHELTER"} · ${object.name.replace(
-          / (Shelter|Station)$/i,
-          "",
-        )} · ${safeHere} SAFE${inbound > 0 ? ` · ${inbound} IN` : ""}`}
-        scale={[18, 2.25, 1]}
-      />
     </group>
   );
 }
@@ -823,12 +804,6 @@ function DockMesh({ object }: BuildingProps) {
         <meshStandardMaterial color="#e7dcc2" roughness={0.7} />
       </mesh>
       <SelectionRing radius={3} active={isSelected} />
-      <WorldLabelSprite
-        position={[0, 1.65, 0]}
-        accent={isSelected ? "#ffb45c" : "#8fb3ab"}
-        text="RESCUE DOCK"
-        scale={[11, 1.8, 1]}
-      />
     </group>
   );
 }

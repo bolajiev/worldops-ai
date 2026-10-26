@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
+import "./studio.css";
 
 const display = Manrope({
   subsets: ["latin"],
